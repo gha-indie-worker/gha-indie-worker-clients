@@ -1,4 +1,4 @@
-import { ClientError } from "./errors";
+import { ClientError } from "./errors.js";
 
 export interface ClientConfig {
   baseUrl: string;
@@ -13,10 +13,10 @@ export function configFromEnv(
   if (!baseUrl) {
     throw new ClientError("invalid_base");
   }
+  const bearerToken = env["GHA_INDIE_WORKER_TOKEN"];
   return {
     baseUrl,
-    bearerToken: env["GHA_INDIE_WORKER_TOKEN"] || undefined,
+    ...(bearerToken ? { bearerToken } : {}),
     maxResponseBytes: 64 * 1024,
   };
 }
-
