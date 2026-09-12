@@ -1,7 +1,10 @@
 import 'errors.dart';
 
 class ClientConfig {
-  const ClientConfig({required this.baseUrl, this.bearerToken, this.maxResponseBytes = 64 * 1024});
+  const ClientConfig(
+      {required this.baseUrl,
+      this.bearerToken,
+      this.maxResponseBytes = 64 * 1024});
   final String baseUrl;
   final String? bearerToken;
   final int maxResponseBytes;
@@ -9,9 +12,9 @@ class ClientConfig {
   factory ClientConfig.fromEnvironment(Map<String, String> env) {
     final base = env['GHA_INDIE_WORKER_API_BASE']?.trim() ?? '';
     if (base.isEmpty) {
-      throw const ClientException('invalid_base');
+      throw const ClientException(ClientErrorCode.invalidBase);
     }
-    return ClientConfig(baseUrl: base, bearerToken: env['GHA_INDIE_WORKER_TOKEN']);
+    return ClientConfig(
+        baseUrl: base, bearerToken: env['GHA_INDIE_WORKER_TOKEN']);
   }
 }
-
