@@ -28,6 +28,7 @@ the new violations. When you clear a class of violation, lower the budget in the
 same commit with `--write-budget`.
 
 The principles, the rule codes and the remedy for each are in `FP-GUIDELINES.md`.
+
 ## Repository-local Git worktrees
 
 - Create or use a Git worktree only when the human operator explicitly authorizes it for the current task. Concurrency or a dirty checkout is not permission by itself.
