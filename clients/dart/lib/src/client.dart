@@ -8,23 +8,32 @@ import 'models.dart';
 class Client {
   Client(this.config) {
     if (config.baseUrl.trim().isEmpty) {
-      throw const ClientException('invalid_base');
+      throw const ClientException(ClientErrorCode.invalidBase);
     }
   }
 
   final ClientConfig config;
 
-  String healthUrl() => '${config.baseUrl.replaceAll(RegExp(r'/$'), '')}/v1/health';
+  String healthUrl() =>
+      '${config.baseUrl.replaceAll(RegExp(r'/$'), '')}/v1/health';
 
   Health decodeHealth(Uint8List body) {
     if (body.length > config.maxResponseBytes) {
-      throw const ClientException('too_large');
+      throw const ClientException(ClientErrorCode.tooLarge);
     }
-    final decoded = jsonDecode(utf8.decode(body));
-    if (decoded is! Map<String, Object?>) {
-      throw const ClientException('invalid_json');
+    final Object? decoded;
+    try {
+      decoded = jsonDecode(utf8.decode(body));
+    } on FormatException {
+      throw const ClientException(ClientErrorCode.invalidJson);
     }
-    return Health(ok: decoded['ok'] == true, service: '${decoded['service']}');
+    if (decoded is! Map ||
+        decoded['ok'] is! bool ||
+        decoded['service'] is! String ||
+        (decoded['service'] as String).isEmpty) {
+      throw const ClientException(ClientErrorCode.invalidShape);
+    }
+    return Health(
+        ok: decoded['ok'] as bool, service: decoded['service'] as String);
   }
 }
-
