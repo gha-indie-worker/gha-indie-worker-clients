@@ -1,4 +1,5 @@
+[package]
+org = "gha-indie-worker"
 name = "gha-indie-worker-clients"
-kind = "clients"
 version = "0.1.0"
-
+kind = "sdk"
