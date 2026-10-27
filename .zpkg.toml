@@ -1,4 +1,8 @@
+[package]
+org = "gha-indie-worker"
 name = "gha-indie-worker-clients"
-kind = "clients"
 version = "0.1.0"
 
+[package.repository]
+vcs = "git"
+url = "https://github.com/gha-indie-worker/gha-indie-worker-clients"
