@@ -2,17 +2,18 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { makeRecord, verifyRecord } from '../scripts/ci-public-synthetic-canary.mjs';
+import { makeRecord, verifyRecord, requireCleanGitStatus } from '../scripts/ci-public-synthetic-canary.mjs';
 
 const repo='gha-indie-worker/gha-indie-worker-clients';
 const head='a'.repeat(40), tree='b'.repeat(40);
-const payload=Buffer.from(['PUBLIC_RUNNER_ADMISSION_CANARY_V1',repo,head,tree,''].join('\n'),'utf8');
+const payload=Buffer.from(['PUBLIC_RUNNER_ADMISSION_CANARY_V2',repo,'1347878296',head,tree,''].join('\n'),'utf8');
 const valid=()=>makeRecord(repo,head,tree);
 const verify=r=>verifyRecord(r,repo,head,tree,payload);
 
 test('exact synthetic canary accepted',()=>assert.equal(verify(valid()),true));
 for(const [label,modify] of [
   ['wrong repository',r=>r.repo='other/private-repo'],
+  ['wrong numeric repository',r=>r.repoId=111111111],
   ['stale head',r=>r.sourceCommit='c'.repeat(40)],
   ['changed tree',r=>r.sourceTree='c'.repeat(40)],
   ['forged digest',r=>r.sha256='0'.repeat(64)],
@@ -42,4 +43,10 @@ test('workflow uses no private checkout, secrets or write token',()=>{
   assert.match(flow,/node --test tests\/ci-public-synthetic-canary\.test\.mjs/);
   assert.doesNotMatch(flow,/pull_request_target:|secrets\.|contents: write|id-token: write|packages: write/);
   assert.doesNotMatch(flow,/^\s+repository:/m);
+});
+
+test('reject tracked, staged, and untracked checkout tampering',()=>{
+  assert.doesNotThrow(()=>requireCleanGitStatus(''));
+  for(const state of [' M file.mjs\n','M  file.mjs\n','?? injected.mjs\n','A  staged.txt\n'])
+    assert.throws(()=>requireCleanGitStatus(state),/carrier checkout dirty/);
 });
