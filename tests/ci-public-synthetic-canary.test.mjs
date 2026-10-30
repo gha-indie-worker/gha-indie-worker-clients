@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync,readFileSync,rmSync,writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { test } from 'node:test';
-import { makeRecord, verifyRecord, requireCleanGitStatus } from '../scripts/ci-public-synthetic-canary.mjs';
+import { gitStatus, makeRecord, verifyRecord, requireCleanGitStatus } from '../scripts/ci-public-synthetic-canary.mjs';
 
 const repo='gha-indie-worker/gha-indie-worker-clients';
 const head='a'.repeat(40), tree='b'.repeat(40);
@@ -49,4 +52,28 @@ test('reject tracked, staged, and untracked checkout tampering',()=>{
   assert.doesNotThrow(()=>requireCleanGitStatus(''));
   for(const state of [' M file.mjs\n','M  file.mjs\n','?? injected.mjs\n','A  staged.txt\n'])
     assert.throws(()=>requireCleanGitStatus(state),/carrier checkout dirty/);
+});
+
+test('real public synthetic Git checkout rejects tracked, staged, untracked and ignored bytes',()=>{
+  const cwd=mkdtempSync(join(tmpdir(),'public-canary-clean-'));
+  const git=(...args)=>execFileSync('git',args,{cwd,encoding:'utf8',timeout:10000});
+  try {
+    git('init','-q');
+    writeFileSync(join(cwd,'fixture.txt'),'baseline\n');
+    writeFileSync(join(cwd,'.gitignore'),'secret-ignored.txt\n');
+    git('add','fixture.txt','.gitignore');
+    git('-c','user.name=Public Canary','-c','user.email=canary@example.invalid','commit','-qm','synthetic');
+    requireCleanGitStatus(gitStatus(cwd));
+    writeFileSync(join(cwd,'fixture.txt'),'modified\n');
+    assert.throws(()=>requireCleanGitStatus(gitStatus(cwd)),/dirty/);
+    git('add','fixture.txt');
+    assert.throws(()=>requireCleanGitStatus(gitStatus(cwd)),/dirty/);
+    git('reset','-q','--hard','HEAD');
+    writeFileSync(join(cwd,'untracked.txt'),'untracked\n');
+    assert.throws(()=>requireCleanGitStatus(gitStatus(cwd)),/dirty/);
+    rmSync(join(cwd,'untracked.txt'));
+    writeFileSync(join(cwd,'secret-ignored.txt'),'hidden\n');
+    assert.match(gitStatus(cwd),/!! secret-ignored\.txt/);
+    assert.throws(()=>requireCleanGitStatus(gitStatus(cwd)),/dirty/);
+  } finally {rmSync(cwd,{recursive:true,force:true})}
 });

@@ -39,9 +39,12 @@ export function verifyRecord(record, repo, commit, tree, data) {
 }
 const git = arg=>execFileSync('git',['rev-parse',arg],{encoding:'utf8'}).trim();
 export function requireCleanGitStatus(status) {
-  assert.equal(status,'','carrier checkout dirty (tracked, staged or untracked)');
+  assert.equal(status,'','carrier checkout dirty (tracked, staged, untracked or ignored)');
 }
-const gitStatus=()=>execFileSync('git',['status','--porcelain=v1','--untracked-files=all'],{encoding:'utf8'});
+export function gitStatus(cwd=process.cwd()) {
+  return execFileSync('git',['status','--porcelain=v1','--untracked-files=all','--ignored=matching'],
+    {cwd,encoding:'utf8',timeout:10000});
+}
 export function verifyRunner(expectedCommit) {
   assert.equal(process.env.GITHUB_REPOSITORY,allowed,'event repository mismatch');
   assert.equal(process.env.GITHUB_REPOSITORY_ID,String(repoId),'GitHub repository ID mismatch');
