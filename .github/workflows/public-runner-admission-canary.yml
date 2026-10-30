@@ -1,0 +1,35 @@
+name: Public synthetic runner-admission canary
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/public-runner-admission-canary.yml'
+      - 'scripts/ci-public-synthetic-canary.mjs'
+      - 'tests/ci-public-synthetic-canary.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-synthetic-canary:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Exact public carrier checkout, no retained credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          submodules: false
+          fetch-depth: 1
+          clean: true
+      - name: Set up Node 22
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+      - name: Run positive and adversarial source-free tests
+        run: node --test tests/ci-public-synthetic-canary.test.mjs
+      - name: Verify exact carrier Git tree and public fixture digest
+        env:
+          EXPECTED_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node scripts/ci-public-synthetic-canary.mjs --run "$EXPECTED_COMMIT"
+      - name: State evidence boundary
+        run: echo 'Executed public carrier synthetic check only; no private compiler source accessed or authorized.' >> "$GITHUB_STEP_SUMMARY"
