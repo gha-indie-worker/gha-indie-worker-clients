@@ -1,0 +1,20 @@
+// Native guest-only positive/negative HTTPS origin tests.
+import module health_url from "../src/health_url";
+
+pub routine main(): int {
+  if health_url.endpoint("https://example.com") !=
+    "https://example.com/v1/health"; then return 21; fi
+  if health_url.endpoint("http://example.com") != "" ||
+    health_url.endpoint("https://") != "" ||
+    health_url.endpoint("https://example.com/evil") != "" ||
+    health_url.endpoint("https://name:secret@example.com") != ""; then return 22; fi
+  if health_url.endpoint("https://example.com?x=1") != "" ||
+    health_url.endpoint("https://example.com#fragment") != "" ||
+    health_url.endpoint("https://example.com%2fpath") != "" ||
+    health_url.endpoint("https://example.com\\path") != ""; then return 23; fi
+  if health_url.endpoint("https://example..com") != "" ||
+    health_url.endpoint("https://.example.com") != "" ||
+    health_url.endpoint("https://example.com.") != "" ||
+    health_url.endpoint("https://example.com:443") != ""; then return 24; fi
+  return 0;
+}
