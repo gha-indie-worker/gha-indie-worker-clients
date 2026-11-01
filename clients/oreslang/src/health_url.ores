@@ -1,0 +1,24 @@
+// Preliminary pure HTTPS origin filter; NOT a complete URL parser or transport.
+// Explicit ports/IPv6 are deliberately rejected until independently parsed.
+define module health_url as
+  pub fnc valid_origin(String base): bool {
+    if !base.starts_with("https://") || base == "https://"; then return false; fi
+    val String host = base.replace_literal("https://", "");
+    if base != "https://" + host; then return false; fi
+    if host == "" || host.starts_with(".") || host.ends_with(".")
+      || host.starts_with("-") || host.ends_with("-")
+      || host.contains_literal("..") || host.contains_literal(":")
+      || host.contains_literal("/") || host.contains_literal("\\")
+      || host.contains_literal("@") || host.contains_literal("?")
+      || host.contains_literal("#") || host.contains_literal("%")
+      || host.contains_literal(" ") || host.contains_literal("\t")
+      || host.contains_literal("\n") || host.contains_literal("\r")
+      || host.contains_literal("\u0000"); then return false; fi
+    return true;
+  }
+
+  pub fnc endpoint(String base): String {
+    if !valid_origin(base); then return ""; fi
+    return base + "/v1/health";
+  }
+end
