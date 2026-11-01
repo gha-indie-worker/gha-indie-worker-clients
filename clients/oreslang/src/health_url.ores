@@ -24,6 +24,15 @@ define module health_url as
     return residue == "";
   }
 
+  fnc numeric_label(String label): bool {
+    val String residue = label
+      .replace_literal("0","").replace_literal("1","").replace_literal("2","")
+      .replace_literal("3","").replace_literal("4","").replace_literal("5","")
+      .replace_literal("6","").replace_literal("7","").replace_literal("8","")
+      .replace_literal("9","");
+    return residue == "";
+  }
+
   pub fnc valid_origin(String base): bool {
     if !base.starts_with("https://") || base == "https://"; then
       return false;
@@ -33,7 +42,9 @@ define module health_url as
     // A public-domain-looking DNS name is necessary but not sufficient.
     // This excludes single-label local hosts and makes IPv4 literals fail.
     val labels = host.split_literal(".");
-    if labels.size < 2; then return false; fi
+    if labels.size < 2 || numeric_label(labels.get(labels.size - 1)); then
+      return false;
+    fi
     for (const label of labels) {
       if !valid_dns_label(label); then return false; fi
     }
