@@ -1,19 +1,42 @@
-// Preliminary pure HTTPS origin filter; NOT a complete URL parser or transport.
-// Explicit ports/IPv6 are deliberately rejected until independently parsed.
+// Strict ASCII DNS-origin *syntax* filter for a future Oreslang health client.
+// This does not authorize network access: runtime TLS, DNS/IP range checks,
+// redirects, port/SNI binding and bounded I/O remain separate unimplemented gates.
+// IPv4, IPv6, ports, userinfo, local names and non-ASCII names are unsupported.
 define module health_url as
+  fnc valid_dns_label(String label): bool {
+    if label == "" || label.starts_with("-") || label.ends_with("-"); then
+      return false;
+    fi
+    val String residue = label
+      .replace_literal("a","").replace_literal("b","").replace_literal("c","")
+      .replace_literal("d","").replace_literal("e","").replace_literal("f","")
+      .replace_literal("g","").replace_literal("h","").replace_literal("i","")
+      .replace_literal("j","").replace_literal("k","").replace_literal("l","")
+      .replace_literal("m","").replace_literal("n","").replace_literal("o","")
+      .replace_literal("p","").replace_literal("q","").replace_literal("r","")
+      .replace_literal("s","").replace_literal("t","").replace_literal("u","")
+      .replace_literal("v","").replace_literal("w","").replace_literal("x","")
+      .replace_literal("y","").replace_literal("z","")
+      .replace_literal("0","").replace_literal("1","").replace_literal("2","")
+      .replace_literal("3","").replace_literal("4","").replace_literal("5","")
+      .replace_literal("6","").replace_literal("7","").replace_literal("8","")
+      .replace_literal("9","").replace_literal("-","");
+    return residue == "";
+  }
+
   pub fnc valid_origin(String base): bool {
-    if !base.starts_with("https://") || base == "https://"; then return false; fi
+    if !base.starts_with("https://") || base == "https://"; then
+      return false;
+    fi
     val String host = base.replace_literal("https://", "");
     if base != "https://" + host; then return false; fi
-    if host == "" || host.starts_with(".") || host.ends_with(".")
-      || host.starts_with("-") || host.ends_with("-")
-      || host.contains_literal("..") || host.contains_literal(":")
-      || host.contains_literal("/") || host.contains_literal("\\")
-      || host.contains_literal("@") || host.contains_literal("?")
-      || host.contains_literal("#") || host.contains_literal("%")
-      || host.contains_literal(" ") || host.contains_literal("\t")
-      || host.contains_literal("\n") || host.contains_literal("\r")
-      || host.contains_literal("\u0000"); then return false; fi
+    // A public-domain-looking DNS name is necessary but not sufficient.
+    // This excludes single-label local hosts and makes IPv4 literals fail.
+    val labels = host.split_literal(".");
+    if labels.size < 2; then return false; fi
+    for (const label of labels) {
+      if !valid_dns_label(label); then return false; fi
+    }
     return true;
   }
 
