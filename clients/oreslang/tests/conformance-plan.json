@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "language": "oreslang",
+  "package": "gha-indie-worker-client",
+  "status": "candidate_unverified",
+  "publishable": false,
+  "positive_guests": [
+    {
+      "source": "tests/health_admission.ores",
+      "expected_exit": 0
+    }
+  ],
+  "negative_compile_guests": [
+    {
+      "source": "tests/reject_unknown_operation.ores",
+      "expected_rejected": true,
+      "emitted_artifacts": 0
+    }
+  ],
+  "required_backends": [
+    "java-graalvm",
+    "llvm",
+    "cranelift",
+    "wasm",
+    "net-nativeaot"
+  ],
+  "required_receipts": [
+    "exact_head_sha",
+    "source_sha256",
+    "compiler_sha256",
+    "runtime_sha256",
+    "artifact_sha256",
+    "stepful_guest_execution",
+    "negative_artifact_absence",
+    "tjsv_current_input_contract_ir"
+  ]
+}
