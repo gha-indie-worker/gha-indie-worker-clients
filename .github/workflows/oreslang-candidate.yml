@@ -20,6 +20,6 @@ jobs:
         with:
           node-version: '24'
       - name: Check candidate layout and negative admission (HOST ONLY)
-        run: node --test clients/oreslang/tests/source_contract.test.mjs
+        run: node --test clients/oreslang/tests/source_contract.test.mjs clients/oreslang/tests/scalar_manifest.test.mjs
       - name: No native execution claimed
         run: echo 'This job does not compile or run native Oreslang source.'
