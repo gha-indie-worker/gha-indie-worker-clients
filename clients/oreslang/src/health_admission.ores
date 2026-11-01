@@ -1,0 +1,19 @@
+// Pure, portable admission predicates for the GHA Indie Worker health endpoint.
+// Not an HTTP transport, JSON validator, or published SDK.
+define module health_admission as
+  pub fnc admit_health_response(int status, int byte_count, int max_bytes): bool {
+    if status != 200 || byte_count <= 0 || max_bytes <= 0 ||
+      max_bytes > 65536 || byte_count > max_bytes; then
+      return false;
+    fi
+    return true;
+  }
+
+  pub fnc is_redirect(int status): bool {
+    return status >= 300 && status < 400;
+  }
+
+  pub fnc valid_body_cap(int max_bytes): bool {
+    return max_bytes > 0 && max_bytes <= 65536;
+  }
+end
