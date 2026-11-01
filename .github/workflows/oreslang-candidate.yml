@@ -1,0 +1,25 @@
+name: Oreslang health candidate (host-only checks)
+on:
+  pull_request:
+    paths:
+      - 'clients/oreslang/**'
+      - 'clients/support-matrix.toml'
+      - '.github/workflows/oreslang-candidate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unadmitted-source-fixtures:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Check candidate layout and negative admission (HOST ONLY)
+        run: node --test clients/oreslang/tests/source_contract.test.mjs
+      - name: No native execution claimed
+        run: echo 'This job does not compile or run native Oreslang source.'
