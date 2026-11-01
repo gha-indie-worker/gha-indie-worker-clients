@@ -1,0 +1,1 @@
+fnc main(): int { return 11 + (6 * (5 - 1)); }
