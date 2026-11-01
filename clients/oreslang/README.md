@@ -13,3 +13,5 @@ The public endpoint is `GET /v1/health`. Its Rust and TypeScript peers establish
 - Add real external-consumer installation and publish gates; only then register `oreslang` in `clients/support-matrix.toml` and release manifests. JS/browser support requires its own verified transpilation target.
 
 This intentionally keeps the candidate outside the shipping target matrix until all admission checks pass.
+
+Additional pure source: `src/health_url.ores` implements a conservative HTTPS origin-only filter and `/v1/health` path preparation; `tests/health_url.ores` contains adversarial source fixtures. It rejects explicit ports and IPv6 by policy until a reviewed URI parser is available. These string guards are **not** a sufficient SSRF/DNS/TLS security boundary and have not been compiler-checked. They must never be used as proof that HTTP transport or runtime adapters are safe.
