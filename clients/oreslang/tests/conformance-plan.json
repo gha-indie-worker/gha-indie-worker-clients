@@ -8,6 +8,10 @@
     {
       "source": "tests/health_admission.ores",
       "expected_exit": 0
+    },
+    {
+      "source": "tests/health_url.ores",
+      "expected_exit": 0
     }
   ],
   "negative_compile_guests": [
@@ -33,5 +37,6 @@
     "stepful_guest_execution",
     "negative_artifact_absence",
     "tjsv_current_input_contract_ir"
-  ]
+  ],
+  "note": "Structural and source fixtures only: native compilers, TJSV and runtime receipts are not verified."
 }
