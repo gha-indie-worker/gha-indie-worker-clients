@@ -1,0 +1,38 @@
+// Run with an actual Oreslang compiler and runtime. Zero exit is required.
+import module health_admission from "../src/health_admission";
+
+pub routine main(): int {
+  if !health_admission.admit_health_response(200, 1, 65536) ||
+    !health_admission.admit_health_response(200, 65536, 65536); then
+    return 11;
+  fi
+  if health_admission.admit_health_response(201, 1, 65536) ||
+    health_admission.admit_health_response(301, 1, 65536) ||
+    health_admission.admit_health_response(401, 1, 65536) ||
+    health_admission.admit_health_response(500, 1, 65536); then
+    return 12;
+  fi
+  if health_admission.admit_health_response(200, 0, 65536) ||
+    health_admission.admit_health_response(200, -1, 65536) ||
+    health_admission.admit_health_response(200, 65537, 65536); then
+    return 13;
+  fi
+  if health_admission.admit_health_response(200, 1, 0) ||
+    health_admission.admit_health_response(200, 1, -1) ||
+    health_admission.admit_health_response(200, 1, 65537); then
+    return 14;
+  fi
+  if !health_admission.is_redirect(300) ||
+    !health_admission.is_redirect(399) ||
+    health_admission.is_redirect(200) ||
+    health_admission.is_redirect(400); then
+    return 15;
+  fi
+  if !health_admission.valid_body_cap(1) ||
+    !health_admission.valid_body_cap(65536) ||
+    health_admission.valid_body_cap(0) ||
+    health_admission.valid_body_cap(65537); then
+    return 16;
+  fi
+  return 0;
+}
