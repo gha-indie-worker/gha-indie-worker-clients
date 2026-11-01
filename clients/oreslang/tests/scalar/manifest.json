@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "profile": "oreslang-client-scalar-v1",
+  "status": "candidate_unverified",
+  "requires_identical_source_bytes": true,
+  "requires_real_guest_execution": true,
+  "allowed_toolchains": [
+    "java-graalvm",
+    "llvm",
+    "wasm",
+    "cranelift",
+    "net-nativeaot"
+  ],
+  "limitations": [
+    "single-function checked signed i64 source subset",
+    "not an HTTP or serialization SDK",
+    "the source has not been compiled on any lane by this package",
+    "the runner must not rewrite source or accept compile failures as passes"
+  ],
+  "cases": [
+    {
+      "path": "01-precedence.ores",
+      "kind": "value",
+      "expected_value": 14
+    },
+    {
+      "path": "02-grouping.ores",
+      "kind": "value",
+      "expected_value": 20
+    },
+    {
+      "path": "03-signed.ores",
+      "kind": "value",
+      "expected_value": 5
+    },
+    {
+      "path": "04-i64-edge.ores",
+      "kind": "value",
+      "expected_value": 1
+    },
+    {
+      "path": "05-separators.ores",
+      "kind": "value",
+      "expected_value": 100
+    },
+    {
+      "path": "06-nested.ores",
+      "kind": "value",
+      "expected_value": 35
+    },
+    {
+      "path": "07-unknown-reject.ores",
+      "kind": "compile_reject",
+      "expected_diagnostic_category": "unknown_symbol"
+    },
+    {
+      "path": "08-overflow-reject.ores",
+      "kind": "compile_reject",
+      "expected_diagnostic_category": "integer_range"
+    },
+    {
+      "path": "09-syntax-reject.ores",
+      "kind": "compile_reject",
+      "expected_diagnostic_category": "syntax"
+    }
+  ],
+  "required_evidence": [
+    "exact_head_sha",
+    "source_sha256",
+    "compiler_binary_sha256",
+    "runtime_binary_sha256",
+    "compiled_artifact_sha256",
+    "toolchain_identity",
+    "stepful_compile_and_guest_execution",
+    "negative_no_artifact"
+  ]
+}
