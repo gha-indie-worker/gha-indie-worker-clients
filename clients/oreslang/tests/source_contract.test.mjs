@@ -51,3 +51,16 @@ test('source-only guards do not pretend to include an HTTP transport', () => {
   assert.equal(plan.runtime_verified, undefined);
   assert.equal(plan.required_receipts.includes('stepful_guest_execution'), true);
 });
+
+test('source-only DNS policy limits and adversarial guest probes are pinned', () => {
+  const url = checkedSource('src/health_url.ores');
+  const guest = checkedSource('tests/health_url.ores');
+  assert.match(url, /label\.size\s*>\s*63/);
+  assert.match(url, /base\.size\s*>\s*261/);
+  assert.match(url, /numeric_label\(labels\.get/);
+  assert.match(url, /valid_dns_label\(label\)/);
+  assert.match(guest, /then return 29; fi/);
+  assert.match(guest, /then return 30; fi/);
+  assert.match(guest, /exämple\.com/);
+  // Reviewable source expectations only. No compiled Oreslang guest ran.
+});
