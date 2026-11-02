@@ -40,5 +40,10 @@ pub routine main(): int {
   fi
   if health_url.endpoint("https://api.example.com") !=
     "https://api.example.com/v1/health"; then return 28; fi
+  // DNS limits are enforced on the pure guest side before a transport exists.
+  if health_url.endpoint("https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.example.com") !=
+    "https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.example.com/v1/health"; then return 29; fi
+  if health_url.endpoint("https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.example.com") != "" ||
+    health_url.endpoint("https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.com") != ""; then return 30; fi
   return 0;
 }
