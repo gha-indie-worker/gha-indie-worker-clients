@@ -14,7 +14,7 @@ The public endpoint is `GET /v1/health`. Its Rust and TypeScript peers establish
 
 This intentionally keeps the candidate outside the shipping target matrix until all admission checks pass.
 
-Additional pure source: `src/health_url.ores` implements a conservative HTTPS origin-only filter and `/v1/health` path preparation; `tests/health_url.ores` contains adversarial source fixtures. It rejects explicit ports and IPv6 by policy until a reviewed URI parser is available. These string guards are **not** a sufficient SSRF/DNS/TLS security boundary and have not been compiler-checked. They must never be used as proof that HTTP transport or runtime adapters are safe.
+Additional pure source: `src/health_url.ores` implements a conservative HTTPS origin-only filter and `/v1/health` path preparation; `tests/health_url.ores` contains adversarial source fixtures. It rejects explicit ports and IPv6 by policy until a reviewed URI parser is available. The DNS-only filter now enforces lowercase ASCII labels (1–63 octets each) and total host length at most 253 octets, with native guest probes for both limits. Both pilot candidates use byte-identical origin-filter sources and tests. These string guards are **not** a sufficient SSRF/DNS/TLS security boundary and have not been compiler-checked. They must never be used as proof that HTTP transport or runtime adapters are safe.
 
 ## Five-toolchain parity evidence (2026-11-01)
 
@@ -26,7 +26,7 @@ The nine scalar guest files under `tests/scalar/` are byte-for-byte identical ac
 | LLVM | [oreslang-source.llvm#1294](https://github.com/ores-truffle-oreslang/oreslang-source.llvm/pull/1294) | **No**; proposed Clang-linked native guest results |
 | Wasm | [oreslang-source.wasm#262](https://github.com/ores-truffle-oreslang/oreslang-source.wasm/pull/262) | **No**; requires a real pinned Oreslang compiler and isolated Wasm run |
 | Cranelift | [oreslang-source.cranelift#73](https://github.com/ores-truffle-oreslang/oreslang-source.cranelift/pull/73) | **No**; proposed real native JIT + IR tests |
-| .NET Native AOT | [oreslang-source.net#325](https://github.com/ores-truffle-oreslang/oreslang-source.net/pull/325) | **No**; proposed six checks, three negative denials and two Native AOT executions |
+| .NET Native AOT | [oreslang-source.net#325](https://github.com/ores-truffle-oreslang/oreslang-source.net/pull/325) | **No**; proposed six real Native AOT executions and three negative compiler denials |
 
 GitHub Actions in the private compiler organization has returned failures with **zero executed steps**, so the above drafts provide **authored test coverage, not runtime passes**. Do not transfer private compiler source to another organization merely to bypass billing/runner admission. Independently approved private-source transfer would be required.
 
