@@ -4,7 +4,10 @@
 // IPv4, IPv6, ports, userinfo, local names and non-ASCII names are unsupported.
 define module health_url as
   fnc valid_dns_label(String label): bool {
-    if label == "" || label.starts_with("-") || label.ends_with("-"); then
+    // DNS wire format: each label contains 1..63 ASCII octets.
+    // Source rejects non-ASCII below, making String.size an octet count.
+    if label == "" || label.size > 63 ||
+      label.starts_with("-") || label.ends_with("-"); then
       return false;
     fi
     val String residue = label
@@ -34,7 +37,10 @@ define module health_url as
   }
 
   pub fnc valid_origin(String base): bool {
-    if !base.starts_with("https://") || base == "https://"; then
+    // An ASCII DNS name has at most 253 presentation octets. The extra
+    // "https://" scheme prefix is 8 octets. No path, port or credentials.
+    if base.size > 261 || !base.starts_with("https://") ||
+      base == "https://"; then
       return false;
     fi
     val String host = base.replace_literal("https://", "");
