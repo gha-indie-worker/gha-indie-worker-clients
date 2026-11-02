@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "profile": "oreslang-client-scalar-v1",
+  "status": "candidate_unverified",
+  "requires_identical_source_bytes": true,
+  "requires_real_guest_execution": true,
+  "allowed_toolchains": [
+    "java-graalvm",
+    "llvm",
+    "wasm",
+    "cranelift",
+    "net-nativeaot"
+  ],
+  "limitations": [
+    "single-function checked signed i64 source subset",
+    "not an HTTP or serialization SDK",
+    "the source has not been compiled on any lane by this package",
+    "the runner must not rewrite source or accept compile failures as passes"
+  ],
+  "cases": [
+    {
+      "path": "01-precedence.ores",
+      "kind": "value",
+      "expected_value": 14,
+      "sha256": "e42464360ffa360b263bc74f74ef485e6a9e4eb9dff601ead2c4576982622576"
+    },
+    {
+      "path": "02-grouping.ores",
+      "kind": "value",
+      "expected_value": 20,
+      "sha256": "9196a61de9c4710bdf32e658de396c521ad2abb2e3d03ce711ae449ac7aa5a2f"
+    },
+    {
+      "path": "03-signed.ores",
+      "kind": "value",
+      "expected_value": 5,
+      "sha256": "613d1e1e104361ce555f397dd0d23754d44ade5b80750147110c1e4a73cce286"
+    },
+    {
+      "path": "04-i64-edge.ores",
+      "kind": "value",
+      "expected_value": 1,
+      "sha256": "b0f80c76a24cb15ed25fee0bdaa096d7cbcd318f787f7d8a040166c127532247"
+    },
+    {
+      "path": "05-separators.ores",
+      "kind": "value",
+      "expected_value": 100,
+      "sha256": "2bcfdc119d3e48b9ac97e2061b7b88571d6e621b04ecabf886347d9eeb19382c"
+    },
+    {
+      "path": "06-nested.ores",
+      "kind": "value",
+      "expected_value": 35,
+      "sha256": "dd1bf333cdd17140571227e810427030a279666b8a4d06eb5968a056cf5a8a2a"
+    },
+    {
+      "path": "07-unknown-reject.ores",
+      "kind": "compile_reject",
+      "expected_diagnostic_category": "unknown_symbol",
+      "sha256": "c45493f0814253ab5a2e8896d8b39643c7b8e1247d408eef11baccd79d6580e1"
+    },
+    {
+      "path": "08-overflow-reject.ores",
+      "kind": "compile_reject",
+      "expected_diagnostic_category": "integer_range",
+      "sha256": "37b793a36e231ee37d953b8359cd0f004dc008a795eb32a413762a0a504c542c"
+    },
+    {
+      "path": "09-syntax-reject.ores",
+      "kind": "compile_reject",
+      "expected_diagnostic_category": "syntax",
+      "sha256": "32f4b30c52ce58955ecbb0aa0d564f0ac394737940faaab01351e25ed9df4b75"
+    }
+  ],
+  "required_evidence": [
+    "exact_head_sha",
+    "source_sha256",
+    "compiler_binary_sha256",
+    "runtime_binary_sha256",
+    "compiled_artifact_sha256",
+    "toolchain_identity",
+    "stepful_compile_and_guest_execution",
+    "negative_no_artifact"
+  ],
+  "must_fail_without_all_backends": true
+}

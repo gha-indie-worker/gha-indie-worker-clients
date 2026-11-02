@@ -1,0 +1,4 @@
+# Candidate-only Oreslang package: not registered for publishing.
+[package]
+name = "gha-indie-worker-client"
+version = "0.0.0"

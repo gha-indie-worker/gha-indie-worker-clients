@@ -1,0 +1,49 @@
+// Native guest-only positive/negative HTTPS origin tests.
+import module health_url from "../src/health_url";
+
+pub routine main(): int {
+  if health_url.endpoint("https://example.com") !=
+    "https://example.com/v1/health"; then return 21; fi
+  if health_url.endpoint("http://example.com") != "" ||
+    health_url.endpoint("https://") != "" ||
+    health_url.endpoint("https://example.com/evil") != "" ||
+    health_url.endpoint("https://name:secret@example.com") != ""; then return 22; fi
+  if health_url.endpoint("https://example.com?x=1") != "" ||
+    health_url.endpoint("https://example.com#fragment") != "" ||
+    health_url.endpoint("https://example.com%2fpath") != "" ||
+    health_url.endpoint("https://example.com\\path") != ""; then return 23; fi
+  if health_url.endpoint("https://example..com") != "" ||
+    health_url.endpoint("https://.example.com") != "" ||
+    health_url.endpoint("https://example.com.") != "" ||
+    health_url.endpoint("https://example.com:443") != ""; then return 24; fi
+  // These probes are guest-runtime checks; host-only source inspection
+  // cannot substitute for executing this identical file on all five backends.
+  if health_url.endpoint("https://localhost") != "" ||
+    health_url.endpoint("https://127.0.0.1") != "" ||
+    health_url.endpoint("https://example.123") != "" ||
+    health_url.endpoint("https://api.example.com:8443") != ""; then
+    return 25;
+  fi
+  if health_url.endpoint("https://ex_ample.com") != "" ||
+    health_url.endpoint("https://EXAMPLE.COM") != "" ||
+    health_url.endpoint("https://foo-.example.com") != "" ||
+    health_url.endpoint("https://-foo.example.com") != "" ||
+    health_url.endpoint("https://foo.-bar.com") != ""; then
+    return 26;
+  fi
+  if health_url.endpoint("https://example.com\t") != "" ||
+    health_url.endpoint("https://example.com\n") != "" ||
+    health_url.endpoint("https://example.com\r") != "" ||
+    health_url.endpoint("https://example.com..") != "" ||
+    health_url.endpoint("https://exämple.com") != ""; then
+    return 27;
+  fi
+  if health_url.endpoint("https://api.example.com") !=
+    "https://api.example.com/v1/health"; then return 28; fi
+  // DNS limits are enforced on the pure guest side before a transport exists.
+  if health_url.endpoint("https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.example.com") !=
+    "https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.example.com/v1/health"; then return 29; fi
+  if health_url.endpoint("https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.example.com") != "" ||
+    health_url.endpoint("https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.com") != ""; then return 30; fi
+  return 0;
+}

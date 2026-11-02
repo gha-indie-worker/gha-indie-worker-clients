@@ -1,0 +1,4 @@
+// Must fail at compile/type-check time; zero emitted artifacts permitted.
+pub routine main(): int {
+  return nonexistent_client_operation(7);
+}

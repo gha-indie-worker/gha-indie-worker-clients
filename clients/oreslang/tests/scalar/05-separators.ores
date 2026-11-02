@@ -1,0 +1,1 @@
+fnc main(): int { return 1_000 - 900; }
